@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Alarm Dashboard</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🔔 Live Alarm Records</h2>
+    <div id="status">Connecting to WS2...</div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>UUID</th>
+                <th>Is Open</th>
+                <th>Priority</th>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody id="alarm-body"></tbody>
+    </table>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const alarmBody = document.getElementById('alarm-body');
+      
+        const socket = new WebSocket('https://plain-grapes-cover.loca.lt');
+      
+        socket.onopen = () => {
+          statusDiv.textContent = '✅ Connected to WS2';
+        };
+      
+        socket.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          if (message.type === 'alarm-records') {
+            alarmBody.innerHTML = ''; // clear old records
+            const latestFive = message.records.slice(0, 5); // take top 5
+            latestFive.forEach(rec => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${rec.id}</td>
+                <td>${new Date(rec.timestamp).toLocaleString()}</td>
+                <td>${rec.uuid}</td>
+                <td>${rec.isOpen}</td>
+                <td>${rec.priority}</td>
+                <td>${rec.userAccount || '-'}</td>
+              `;
+              alarmBody.appendChild(row);
+            });
+          }
+        };
+      
+        socket.onerror = () => {
+          statusDiv.textContent = '❌ Failed to connect to WS2';
+        };
+      </script>
+      
+</body>
+
+</html>
