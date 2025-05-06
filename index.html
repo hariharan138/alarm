@@ -54,7 +54,7 @@
         const statusDiv = document.getElementById('status');
         const alarmBody = document.getElementById('alarm-body');
       
-        const socket = new WebSocket('https://ws-2-jmp7.onrender.com');
+        const socket = new WebSocket('https://ws2relayserver.loca.lt');
       
         socket.onopen = () => {
           statusDiv.textContent = '✅ Connected to WS2';
